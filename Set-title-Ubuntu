@@ -1,0 +1,19 @@
+Source: https://www.baeldung.com/linux/current-tab-title
+
+# 1. open the bashrc file 
+nano ~/.bashrc
+
+# 2. Create a set-title() function
+function set-title() {
+  if [[ -z "$ORIG" ]]; then
+    ORIG=$PS1
+  fi
+  TITLE="\[\e]2;$*\a\]"
+  PS1=${ORIG}${TITLE}
+}
+
+# 3. Apply
+source ~/.bashrc
+
+# 4. Call and set title
+set-title Baeldung
