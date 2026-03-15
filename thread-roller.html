@@ -489,7 +489,7 @@ function buildMarkdown(messages, selected) {
     const u = m.handle === hA ? uA : (uB || uA);
     out.push(`**${u.name}** \`${m.handle}\` · ${m.time}`);
     out.push('');
-    m.text.split('\n').forEach(l => out.push(`> ${l}`));
+    m.text.split('\n').forEach(l => out.push(`> ${l.replace(/#\w+/g, '').replace(/\s{2,}/g, ' ').trim()}`));
     out.push('');
     out.push('---');
     out.push('');
