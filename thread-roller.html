@@ -453,7 +453,8 @@ function scorePair(hA, hB, messages) {
 
 function detectBestPair(users, messages) {
   const pool = users.slice(0, Math.min(8, users.length));
-  let best = [pool[0]?.handle, pool[1]?.handle];
+  if (pool.length < 2) return pool.map(u => u.handle);
+  let best = [pool[0].handle, pool[1].handle];
   let bestScore = -1;
   for (let a = 0; a < pool.length; a++) {
     for (let b = a + 1; b < pool.length; b++) {
@@ -465,24 +466,27 @@ function detectBestPair(users, messages) {
 }
 
 function buildMarkdown(messages, selected) {
-  const [hA, hB] = selected;
-  const thread = messages.filter(m => selected.includes(m.handle));
+  // Filter out any undefined slots (can happen with single-user threads)
+  const validSelected = selected.filter(Boolean);
+  if (validSelected.length === 0) return null;
+  const [hA, hB] = validSelected;
+  const thread = messages.filter(m => validSelected.includes(m.handle));
   if (!thread.length) return null;
 
-  const uA = S.users.find(u => u.handle === hA) || { name: hA.replace('@',''), handle: hA };
-  const uB = S.users.find(u => u.handle === hB) || { name: hB.replace('@',''), handle: hB };
+  const uA = S.users.find(u => u.handle === hA) || { name: (hA||'').replace('@',''), handle: hA||'' };
+  const uB = hB ? (S.users.find(u => u.handle === hB) || { name: hB.replace('@',''), handle: hB }) : null;
 
   const out = [];
   out.push(`# Twitter Thread`);
   out.push('');
-  out.push(`**Participants:** ${uA.name} (${hA}) × ${uB.name} (${hB})`);
+  out.push(`**Participants:** ${uA.name} (${hA})${uB ? ` × ${uB.name} (${hB})` : ''}`);
   out.push(`**Messages:** ${thread.length}`);
   out.push('');
   out.push('---');
   out.push('');
 
   for (const m of thread) {
-    const u = m.handle === hA ? uA : uB;
+    const u = m.handle === hA ? uA : (uB || uA);
     out.push(`**${u.name}** \`${m.handle}\` · ${m.time}`);
     out.push('');
     m.text.split('\n').forEach(l => out.push(`> ${l}`));
